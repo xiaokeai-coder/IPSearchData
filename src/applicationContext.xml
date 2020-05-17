@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+          http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+	<!-- 引入约束 -->
+
+	<!-- 注入注解 自动装配 -->
+	<context:annotation-config />
+	<!-- 注解方式实例化 -->
+	<context:component-scan base-package="com.tledu.tt" />
+
+	<!-- 引入jdbc配置文件 -->
+	<context:property-placeholder location="classpath:jdbc.properties"/>
+	
+	<!-- 数据库连接池 -->
+	<bean  id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+			<property name="driverClassName"  value="${driver}"></property>
+			<property name="url" value="${url}"></property>
+			<property name="username" value="${user}"></property>
+			<property name="password" value="${password}"></property>
+	</bean>
+	
+	<!-- SqlSessionFactory配置 -->
+	<bean id="sqlSessionFactory"  class="org.mybatis.spring.SqlSessionFactoryBean">
+			<!-- 把数据库连接池对象配置进去 -->
+			<property name="dataSource"  ref="dataSource"></property>
+			<!-- 把 MyBatis配置文件 设置进去 -->
+			<property name="configLocation"  value="classpath:mybatis-config.xml"></property>
+	</bean>
+	
+	<!-- 事务管理器 -->
+	<bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+			<!-- 把数据库连接池对象配置进去 -->
+			<property name="dataSource"  ref="dataSource"></property>
+	</bean>
+	
+	<!-- 配置通知 -->
+	<tx:advice id="txAdvice"  transaction-manager="transactionManager">
+			<tx:attributes>
+			<!-- 
+					propagation="REQUIRED" 传播行为 没有事务就新建一个
+					
+					read-only="true"  : 是否只读
+			 -->
+					<tx:method name="find*"  read-only="true"   propagation="REQUIRED"/>
+					<tx:method name="list*"  read-only="true"   propagation="REQUIRED"/>
+					<tx:method name="load*"  read-only="true"   propagation="REQUIRED"/>
+					<tx:method name="update*"  read-only="false"   propagation="REQUIRED"/>
+					<tx:method name="delete*"  read-only="false"   propagation="REQUIRED"/>
+			</tx:attributes>
+	</tx:advice>
+	
+	<!-- AOP切入点 -->
+	<aop:config>
+			<aop:pointcut expression="execution(public * com.tledu.tt.service..*.*(..))"  id="pointcut" />
+			<!-- 配置切面 -->
+			<aop:advisor advice-ref="txAdvice"   pointcut-ref="pointcut"/>
+	</aop:config>
+</beans>

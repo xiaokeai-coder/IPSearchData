@@ -1,11 +1,11 @@
 package com.tledu.tt.dao.impl;
 
 
-import javax.annotation.Resource;
+
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.support.SqlSessionDaoSupport;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.tledu.tt.dao.IIPAndLocationDao;
@@ -14,7 +14,7 @@ import com.tledu.tt.dao.IIPAndLocationDao;
 @Repository("iPAndLocationDao")
 public class IPAndLocationDao extends SqlSessionDaoSupport implements IIPAndLocationDao{
 
-	@Resource
+	@Autowired
 	public void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory) {
 		super.setSqlSessionFactory(sqlSessionFactory);
 	}
